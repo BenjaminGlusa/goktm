@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"flag"
 	"fmt"
+	"github.com/BenjaminGlusa/goktm/pkg/sink"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
@@ -34,6 +35,9 @@ func main() {
 	var groupId string
 	flag.StringVar(&groupId, "groupId", "", "consumer group id")
 
+	var bucketName string
+	flag.StringVar(&bucketName, "bucketName", "", "bucket to store messages in")
+
 	flag.Parse()
 	if len(roleArn) == 0 {
 		panic("No roleArn provided")
@@ -51,7 +55,14 @@ func main() {
 		groupId = fmt.Sprintf("goktm-%s-%s", topicName, generateRandomString(8))
 	}
 
+	if len(bucketName) == 0 {
+		panic("No bucketName provided")
+	}
+
 	ctx := context.TODO()
+
+	s3Sink := sink.NewS3MessageSink(ctx, roleArn, bucketName)
+
 	creds, err := assumeRole(ctx, roleArn)
 	if err != nil {
 		log.Printf("assume role error, " + err.Error())
@@ -89,6 +100,10 @@ func main() {
 		}
 
 		fmt.Printf("Received message: %d : %d : %v \n", msg.Partition, msg.Offset, string(msg.Value))
+		err = s3Sink.Upload(msg)
+		if err != nil {
+			panic("could not upload message " + err.Error())
+		}
 	}
 
 }
@@ -103,7 +118,7 @@ func generateRandomString(l int) string {
 }
 
 func assumeRole(ctx context.Context, roleArn string) (*credentials.Credentials, error) {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		panic("configuration error, " + err.Error())
 	}
@@ -113,6 +128,7 @@ func assumeRole(ctx context.Context, roleArn string) (*credentials.Credentials, 
 		RoleArn:         aws.String(roleArn),
 		RoleSessionName: aws.String(fmt.Sprintf("goktm-%s", generateRandomString(4))),
 	})
+
 	if err != nil {
 		panic("assume role error, " + err.Error())
 	}
