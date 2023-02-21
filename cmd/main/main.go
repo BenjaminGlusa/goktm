@@ -51,6 +51,7 @@ func main() {
 		panic("assume role error, " + err.Error())
 	}
 
+	fmt.Printf("Connecting to: %s", brokers)
 	dialer := kafkaClientDialer(creds)
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:     strings.Split(brokers, ","),
@@ -72,6 +73,7 @@ func main() {
 	}(reader)
 
 	for ; true; {
+		println("Now reading message...")
 		msg, err := reader.ReadMessage(ctx)
 		if err != nil {
 			log.Printf("could not read message " + err.Error())
@@ -126,7 +128,7 @@ func saslIamMechanism(creds *credentials.Credentials) sasl.Mechanism {
 			value.SecretAccessKey,
 			value.SessionToken,
 		)),
-		Region: os.Getenv("REGION"),
+		Region: os.Getenv("AWS_REGION"),
 	}
 }
 
