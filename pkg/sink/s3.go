@@ -3,15 +3,9 @@ package sink
 import (
 	"context"
 	"fmt"
-	"github.com/BenjaminGlusa/goktm/pkg/random"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/segmentio/kafka-go"
-	"log"
-	"os"
 	"strings"
 )
 
@@ -40,33 +34,14 @@ func (s *S3MessageSink) Upload(message kafka.Message) error {
 	return err
 }
 
-func NewS3MessageSink(ctx context.Context, roleArn string, bucketName string) *S3MessageSink {
-	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(os.Getenv("AWS_REGION")))
-	if err != nil {
-		panic("configuration error, " + err.Error())
-	}
+func (s *S3MessageSink) Process(message kafka.Message) error {
+	return s.Upload(message)
+}
 
-	stsClient := sts.NewFromConfig(cfg)
-	tempCredentials, err := stsClient.AssumeRole(ctx, &sts.AssumeRoleInput{
-		RoleArn:         aws.String(roleArn),
-		RoleSessionName: aws.String(fmt.Sprintf("goktm-%s", random.GenerateString(4))),
-	})
-	if err != nil {
-		log.Printf("Couldn't assume role %v.\n", roleArn)
-		panic(err)
-	}
 
-	assumeRoleConfig, err := config.LoadDefaultConfig(ctx,
-		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
-			*tempCredentials.Credentials.AccessKeyId,
-			*tempCredentials.Credentials.SecretAccessKey,
-			*tempCredentials.Credentials.SessionToken),
-		),
-	)
-	if err != nil {
-		panic(err)
-	}
-	s3Client := s3.NewFromConfig(assumeRoleConfig)
+func NewS3MessageSink(ctx context.Context, config aws.Config, bucketName string) *S3MessageSink {
+
+	s3Client := s3.NewFromConfig(config)
 
 	return &S3MessageSink{
 		Context:    ctx,
