@@ -31,6 +31,9 @@ func main() {
 	var topicName string
 	flag.StringVar(&topicName, "topicName", "", "name of the topic to move")
 
+	var groupId string
+	flag.StringVar(&groupId, "groupId", "", "consumer group id")
+
 	flag.Parse()
 	if len(roleArn) == 0 {
 		panic("No roleArn provided")
@@ -42,6 +45,10 @@ func main() {
 
 	if len(topicName) == 0 {
 		panic("No topicName provided")
+	}
+
+	if len(groupId) == 0 {
+		groupId = fmt.Sprintf("goktm-%s-%s", topicName, generateRandomString(8))
 	}
 
 	ctx := context.TODO()
@@ -57,7 +64,7 @@ func main() {
 		Brokers:     strings.Split(brokers, ","),
 		Topic:       topicName,
 		Dialer:      dialer,
-		GroupID:     fmt.Sprintf("goktm-%s", topicName),
+		GroupID:     groupId,
 		StartOffset: kafka.FirstOffset, // from beginning
 		MaxWait:     3 * time.Second,   // wait for at most 3 seconds before receiving new data
 		MinBytes:    5,
@@ -81,7 +88,7 @@ func main() {
 			panic("could not read message " + err.Error())
 		}
 
-		fmt.Printf("Received message: %d : %d : %v", msg.Partition, msg.Offset, string(msg.Value))
+		fmt.Printf("Received message: %d : %d : %v \n", msg.Partition, msg.Offset, string(msg.Value))
 	}
 
 }
