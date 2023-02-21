@@ -51,15 +51,15 @@ func main() {
 		panic("assume role error, " + err.Error())
 	}
 
-	fmt.Printf("Connecting to: %s", brokers)
+	fmt.Printf("Connecting to: %s \n", brokers)
 	dialer := kafkaClientDialer(creds)
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:     strings.Split(brokers, ","),
 		Topic:       topicName,
 		Dialer:      dialer,
 		GroupID:     fmt.Sprintf("goktm-%s", topicName),
-		StartOffset: 0,               // from beginning
-		MaxWait:     3 * time.Second, // wait for at most 3 seconds before receiving new data
+		StartOffset: kafka.FirstOffset, // from beginning
+		MaxWait:     3 * time.Second,   // wait for at most 3 seconds before receiving new data
 		MinBytes:    5,
 		MaxBytes:    1e6, // 1MB
 	})
@@ -72,14 +72,16 @@ func main() {
 		}
 	}(reader)
 
-	for ; true; {
+	for true {
 		println("Now reading message...")
 		msg, err := reader.ReadMessage(ctx)
+
 		if err != nil {
 			log.Printf("could not read message " + err.Error())
 			panic("could not read message " + err.Error())
 		}
-		fmt.Printf("Received message: %d : %d : %v", msg.Partition, msg.Offset, msg.Value)
+
+		fmt.Printf("Received message: %d : %d : %v", msg.Partition, msg.Offset, string(msg.Value))
 	}
 
 }
