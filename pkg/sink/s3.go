@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/segmentio/kafka-go"
 	"log"
+	"os"
 	"strings"
 )
 
@@ -40,7 +41,7 @@ func (s *S3MessageSink) Upload(message kafka.Message) error {
 }
 
 func NewS3MessageSink(ctx context.Context, roleArn string, bucketName string) *S3MessageSink {
-	cfg, err := config.LoadDefaultConfig(ctx)
+	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(os.Getenv("AWS_REGION")))
 	if err != nil {
 		panic("configuration error, " + err.Error())
 	}
