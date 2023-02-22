@@ -25,6 +25,11 @@ type KafkaMessageSource struct {
 	groupId   string
 }
 
+// Fetch FIXME: fetch runs forever
+// Idea: create a kafka.client to list topic offset and check if message with offset was read
+// See:
+// - https://github.com/segmentio/kafka-go/blob/4da3b721ca38db775a5024089cdc4ba14f84e698/client_test.go#L85
+// - https://github.com/segmentio/kafka-go/blob/4da3b721ca38db775a5024089cdc4ba14f84e698/listoffset.go#L79
 func (k *KafkaMessageSource) Fetch(processor model.MessageProcessor) {
 	fmt.Printf("Connecting to: %s \n", k.brokers)
 
