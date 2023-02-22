@@ -7,10 +7,10 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-type KafkaMessageSink struct{
+type KafkaMessageSink struct {
 	topicName string
-	brokers []string
-	writer *kafka.Writer
+	brokers   []string
+	writer    *kafka.Writer
 }
 
 func (k *KafkaMessageSink) connect() {
@@ -20,7 +20,7 @@ func (k *KafkaMessageSink) connect() {
 
 	k.writer = &kafka.Writer{
 		Addr:     kafka.TCP(k.brokers...),
-		Topic:   k.topicName,
+		Topic:    k.topicName,
 		Balancer: &kafka.LeastBytes{},
 	}
 
@@ -28,21 +28,23 @@ func (k *KafkaMessageSink) connect() {
 
 func (k *KafkaMessageSink) Process(message kafka.Message) error {
 	k.connect()
-	
+
+	key := fmt.Sprintf("%d:%d", message.Partition, message.Offset)
+	fmt.Printf("Now publishing into %s: %s\n", k.topicName, key)
+
 	err := k.writer.WriteMessages(context.Background(),
 		kafka.Message{
-			Key:   []byte(fmt.Sprintf("%d:%d", message.Partition, message.Offset)),
+			Key:   []byte(key),
 			Value: message.Value,
 		},
 	)
 	return err
 }
 
-
 func NewKafkaMessageSink(topicName string, brokers []string) *KafkaMessageSink {
 	return &KafkaMessageSink{
 		topicName: topicName,
-		brokers: brokers,
-		writer: nil,
+		brokers:   brokers,
+		writer:    nil,
 	}
 }

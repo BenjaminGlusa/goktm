@@ -7,9 +7,10 @@ type MessageProcessor interface {
 }
 
 type CliOptions struct {
-	RoleArn string
-	Brokers string
-	TopicName string
-	GroupId string
+	Operation  string
+	RoleArn    string
+	Brokers    string
+	TopicName  string
+	GroupId    string
 	BucketName string
 }

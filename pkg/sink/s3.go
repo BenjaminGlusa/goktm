@@ -38,7 +38,6 @@ func (s *S3MessageSink) Process(message kafka.Message) error {
 	return s.Upload(message)
 }
 
-
 func NewS3MessageSink(ctx context.Context, config aws.Config, bucketName string) *S3MessageSink {
 
 	s3Client := s3.NewFromConfig(config)

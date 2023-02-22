@@ -67,6 +67,7 @@ Now you can run goktm with the following command:
 
 ```sh
 /bin/goktm-linux-386 \
+  --operation backup \
   --roleArn <your-role-arn> \
   --brokers <your-brokers> \
   --topicName <name-of-the-topic> \

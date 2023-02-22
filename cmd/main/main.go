@@ -1,34 +1,30 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
-	"strings"
-
-	"github.com/BenjaminGlusa/goktm/pkg/aws"
+	"github.com/BenjaminGlusa/goktm/internal/operations"
 	"github.com/BenjaminGlusa/goktm/pkg/model"
 	"github.com/BenjaminGlusa/goktm/pkg/random"
-	"github.com/BenjaminGlusa/goktm/pkg/sink"
-	"github.com/BenjaminGlusa/goktm/pkg/source"
 )
 
 func main() {
 	fmt.Println("Hello")
 	options := parseOptions()
-	
-	ctx := context.TODO()
-	config := aws.AssumeRole(ctx, options.RoleArn)
 
-	s3Sink := sink.NewS3MessageSink(ctx, config, options.BucketName)
-	kafkaSource := source.NewKafkaMessageSource(ctx, config, options.TopicName, strings.Split(options.Brokers, ","), options.GroupId)
+	switch options.Operation {
+	case "backup":
+		operations.Backup(options)
+		break
+	case "restore":
+		panic("sorry, restore is not implemented yet.")
+	}
 
-	kafkaSource.Fetch(s3Sink)
-	
 }
 
-
 func parseOptions() *model.CliOptions {
+	var operation string
+	flag.StringVar(&operation, "operation", "backup", "backup or restore")
 
 	var roleArn string
 	flag.StringVar(&roleArn, "roleArn", "", "the iam role to use to authenticate against the brokers")
@@ -46,6 +42,11 @@ func parseOptions() *model.CliOptions {
 	flag.StringVar(&bucketName, "bucketName", "", "bucket to store messages in")
 
 	flag.Parse()
+
+	if operation != "backup" && operation != "restore" {
+		panic("operation has to be either 'backup' or 'restore'")
+	}
+
 	if len(roleArn) == 0 {
 		panic("No roleArn provided")
 	}
@@ -67,10 +68,11 @@ func parseOptions() *model.CliOptions {
 	}
 
 	return &model.CliOptions{
-		RoleArn: roleArn,
-		Brokers: brokers,
-		TopicName: topicName,
-		GroupId: groupId,
+		Operation:  operation,
+		RoleArn:    roleArn,
+		Brokers:    brokers,
+		TopicName:  topicName,
+		GroupId:    groupId,
 		BucketName: bucketName,
 	}
 

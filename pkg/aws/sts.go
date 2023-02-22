@@ -2,12 +2,12 @@ package aws
 
 import (
 	"context"
+	"fmt"
+	"github.com/BenjaminGlusa/goktm/pkg/random"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/BenjaminGlusa/goktm/pkg/random"
-	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"os"
 )
 
