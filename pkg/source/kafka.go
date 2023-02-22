@@ -11,10 +11,6 @@ import (
 	"github.com/BenjaminGlusa/goktm/pkg/model"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/segmentio/kafka-go"
-	"github.com/segmentio/kafka-go/sasl"
-	"github.com/segmentio/kafka-go/sasl/aws_msk_iam"
-
-	"os"
 )
 
 type KafkaMessageSource struct {
@@ -79,15 +75,6 @@ func NewKafkaMessageSource(ctx context.Context, config aws.Config, topicName str
 	}
 }
 
-func saslIamMechanism(ctx context.Context, config aws.Config) sasl.Mechanism {
-	signer := gaws.NewV4Signer(ctx, config)
-
-	return &aws_msk_iam.Mechanism{
-		Signer: signer,
-		Region: os.Getenv("AWS_REGION"),
-	}
-}
-
 func kafkaClientDialer(ctx context.Context, config aws.Config) *kafka.Dialer {
 	return &kafka.Dialer{
 		Timeout:   10 * time.Second,
@@ -95,6 +82,6 @@ func kafkaClientDialer(ctx context.Context, config aws.Config) *kafka.Dialer {
 		TLS: &tls.Config{
 			InsecureSkipVerify: true,
 		},
-		SASLMechanism: saslIamMechanism(ctx, config),
+		SASLMechanism: gaws.SaslIamMechanism(ctx, config),
 	}
 }
