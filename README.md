@@ -8,4 +8,69 @@ Furthermore, the messages are stored in a s3 bucket before they are re-published
 
 **IMPORTANT**
 
-The project is in an early proof of concept state and **should not be used in production**. 
+The project is in an early proof of concept state and **should not be used in production**.
+
+## Prerequisites
+
+You need an iam role for goktm to assume which has access to the kafka topic you want to move and a s3 bucket to store messages in.
+Here's a sample policy for such a role:
+
+```yaml
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "kafka-cluster:Connect",
+                "kafka-cluster:DescribeTopic",
+                "kafka-cluster:ReadData",
+                "kafka-cluster:AlterGroup",
+                "kafka-cluster:DescribeGroup"
+            ],
+            "Resource": [
+                "arn:aws:kafka:eu-west-1:<account-id>:cluster/<cluster-id>/*",
+                "arn:aws:kafka:eu-west-1:<account-id>:group/<cluster-id>/*",
+                "arn:aws:kafka:eu-west-1:<account-id>:topic/<cluster-id>/*/<topic-name>"
+            ],
+            "Effect": "Allow"
+        },
+        {
+            "Action": [
+                "s3:*"
+            ],
+            "Resource": [
+                "arn:aws:s3:::<bucket-name>/*",
+                "arn:aws:s3:::<bucket-name>"
+            ],
+            "Effect": "Allow"
+        }
+    ]
+}
+
+```
+
+## Usage
+
+You need to build the project first by running:
+
+```sh
+make build
+```
+
+Please also set an environment variable for your aws region:
+
+```sh
+export AWS_REGION=eu-west-1
+```
+
+Now you can run goktm with the following command:
+
+```sh
+/bin/goktm-linux-386 \
+  --roleArn <your-role-arn> \
+  --brokers <your-brokers> \
+  --topicName <name-of-the-topic> \
+  --bucketName <name-of-your-bucket>
+```
+
+This will consume all messages in the topic and store them in the s3 bucket.
