@@ -17,7 +17,8 @@ func main() {
 		operations.Backup(options)
 		break
 	case "restore":
-		panic("sorry, restore is not implemented yet.")
+		operations.Restore(options)
+		break
 	}
 
 }
