@@ -40,7 +40,7 @@ func (k *KafkaMessageSink) connect() {
 		Balancer: nil,
 		Async:    false,
 	}
-	
+
 	k.writer = kafka.NewWriter(writerConfig)
 
 }

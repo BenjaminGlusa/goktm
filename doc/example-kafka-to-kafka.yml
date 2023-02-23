@@ -1,0 +1,18 @@
+source:
+  type: "kafka"
+  roleArn: "aws::..."
+  topicName: "source-topic"
+  brokers:
+    - "b1.foo.com:9181"
+    - "b2.foo.com:9181"
+    - "b3.foo.com:9181"
+  groupId: "consumer-group-1" #optional
+sink:
+  type: "kafka"
+  roleArn: "aws::..."
+  # ensure to either use a different topic name or brokers of a different cluster
+  topicName: "sink-topic"
+  brokers:
+    - "b4.foo.com:9181"
+    - "b5.foo.com:9181"
+    - "b6.foo.com:9181"

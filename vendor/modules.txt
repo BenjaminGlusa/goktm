@@ -198,3 +198,6 @@ github.com/segmentio/kafka-go/sasl
 # github.com/segmentio/kafka-go/sasl/aws_msk_iam v0.0.0-20230217181906-f6986fb02ee7
 ## explicit; go 1.15
 github.com/segmentio/kafka-go/sasl/aws_msk_iam
+# gopkg.in/yaml.v2 v2.4.0
+## explicit; go 1.15
+gopkg.in/yaml.v2

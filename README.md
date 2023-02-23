@@ -63,15 +63,11 @@ Please also set an environment variable for your aws region:
 export AWS_REGION=eu-west-1
 ```
 
+Create a yaml file such as `job.yml` to configure your job. See [doc folder](doc) for examples.
+
 Now you can run goktm with the following command:
 
 ```sh
 /bin/goktm-linux-386 \
-  --operation backup \
-  --roleArn <your-role-arn> \
-  --brokers <your-brokers> \
-  --topicName <name-of-the-topic> \
-  --bucketName <name-of-your-bucket>
+  --options-yaml job.yml
 ```
-
-This will consume all messages in the topic and store them in the s3 bucket.
