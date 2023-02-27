@@ -3,14 +3,13 @@ package source
 import (
 	"context"
 	"fmt"
+	"io"
+	"sort"
+	"strings"
+
 	"github.com/BenjaminGlusa/goktm/pkg/model"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/segmentio/kafka-go"
-	"io"
-	"sort"
-	"strconv"
-	"strings"
 )
 
 type S3ObjectGetter interface {
@@ -114,25 +113,12 @@ func (s *S3Source) GetFileContent(fileName string) []byte {
 	return body
 }
 
-func (s *S3Source) CreateMessage(fileName string, content []byte) kafka.Message {
-	parts := strings.Split(fileName, "_")
+func (s *S3Source) CreateMessage(fileName string, content []byte) model.Message {
 
-	partition, err := strconv.Atoi(parts[1])
-	if err != nil {
-		panic("Cannot parse partition: " + err.Error())
-	}
-
-	offset, err := strconv.ParseInt(parts[2], 10, 64)
-	if err != nil {
-		panic("Cannot parse offset: " + err.Error())
-	}
-
-	return kafka.Message{
-		Topic:     s.TopicName,
-		Offset:    offset,
-		Partition: partition,
-		Key:       []byte(fileName),
-		Value:     content,
+	return model.Message{
+		Id:     fileName,
+		Text: string(content),
+		
 	}
 }
 

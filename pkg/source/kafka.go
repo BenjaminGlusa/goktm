@@ -56,7 +56,9 @@ func (k *KafkaMessageSource) Fetch(processor model.MessageProcessor) {
 		}
 
 		fmt.Printf("Received message: %d : %d : %v \n", msg.Partition, msg.Offset, string(msg.Value))
-		err = processor.Process(msg)
+		message := model.MessageFromKafkaMessage(msg)
+		
+		err = processor.Process(message)
 		if err != nil {
 			panic("could not process message " + err.Error())
 		}

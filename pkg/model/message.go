@@ -1,10 +1,14 @@
 package model
 
-import "github.com/segmentio/kafka-go"
+type Message struct {
+	Id string
+	Text string
+}
 
 type MessageProcessor interface {
-	Process(message kafka.Message) error
+	Process(message Message) error
 }
+
 type MessageSource interface {
 	Fetch(processor MessageProcessor)
 }

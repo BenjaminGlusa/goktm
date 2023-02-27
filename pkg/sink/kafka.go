@@ -4,10 +4,10 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	gaws "github.com/BenjaminGlusa/goktm/pkg/aws"
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"time"
-
+	gaws "github.com/BenjaminGlusa/goktm/pkg/aws"
+	"github.com/BenjaminGlusa/goktm/pkg/model"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/segmentio/kafka-go"
 )
 
@@ -45,16 +45,17 @@ func (k *KafkaMessageSink) connect() {
 
 }
 
-func (k *KafkaMessageSink) Process(message kafka.Message) error {
+func (k *KafkaMessageSink) Process(message model.Message) error {
 	k.connect()
 
-	key := fmt.Sprintf("%d:%d", message.Partition, message.Offset)
+	kafkaMessage := model.KafkaMessageFromMessage(message)
+	key := fmt.Sprintf("%d:%d", kafkaMessage.Partition, kafkaMessage.Offset)
 	fmt.Printf("Now publishing into %s: %s\n", k.topicName, key)
 
 	err := k.writer.WriteMessages(k.context,
 		kafka.Message{
 			Key:   []byte(key),
-			Value: message.Value,
+			Value: kafkaMessage.Value,
 		},
 	)
 	return err

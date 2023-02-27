@@ -2,10 +2,9 @@ package sink
 
 import (
 	"context"
-	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/segmentio/kafka-go"
+	"github.com/BenjaminGlusa/goktm/pkg/model"
 	"strings"
 )
 
@@ -19,14 +18,12 @@ type S3MessageSink struct {
 	BucketName string
 }
 
-func (s *S3MessageSink) Upload(message kafka.Message) error {
-
-	objectKey := fmt.Sprintf("%s_%d_%d", message.Topic, message.Partition, message.Offset)
+func (s *S3MessageSink) Upload(message model.Message) error {
 
 	input := s3.PutObjectInput{
 		Bucket: aws.String(s.BucketName),
-		Key:    aws.String(objectKey),
-		Body:   strings.NewReader(string(message.Value)),
+		Key:    aws.String(message.Id),
+		Body:   strings.NewReader(message.Text),
 	}
 
 	_, err := s.S3Client.PutObject(s.Context, &input)
@@ -34,7 +31,7 @@ func (s *S3MessageSink) Upload(message kafka.Message) error {
 	return err
 }
 
-func (s *S3MessageSink) Process(message kafka.Message) error {
+func (s *S3MessageSink) Process(message model.Message) error {
 	return s.Upload(message)
 }
 
